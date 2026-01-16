@@ -5,16 +5,15 @@ import { notFound } from 'next/navigation';
 
 export const revalidate = 0;
 
-// Next.js 15 の標準的な型定義
-type Props = {
+// ★ Vercelのチェックを確実に通すための最もシンプルな定義
+export default async function WorkDetail({
+  params,
+}: {
   params: Promise<{ id: string }>;
-};
-
-export default async function WorkDetail({ params }: Props) {
-  // 1. params を await して id を取得（Next.js 15の必須ルール）
+}) {
+  // params を await する（Next.js 15 の必須ルール）
   const { id } = await params;
 
-  // 2. MicroCMSからデータを取得
   const project = await client
     .get({
       endpoint: "projects",
@@ -35,13 +34,11 @@ export default async function WorkDetail({ params }: Props) {
       </div>
 
       <div className="w-full h-[60vh] relative">
-        {project.image && (
-          <img
-            src={project.image.url}
-            alt={project.title}
-            className="w-full h-full object-cover"
-          />
-        )}
+        <img
+          src={project.image?.url || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000"}
+          alt={project.title}
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 to-transparent" />
       </div>
 
