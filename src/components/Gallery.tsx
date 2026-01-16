@@ -1,42 +1,57 @@
 // src/components/Gallery.tsx
 'use client';
+
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
-import { projects } from '@/projects';
 
-export default function Gallery() {
+// 受け取るデータの形を定義（型定義）
+type Project = {
+  id: string;
+  title: string;
+  category: string;
+  src: string;
+};
+
+// ★ここが修正点：親から projects を受け取るように変更
+export default function Gallery({ projects }: { projects: Project[] }) {
+  
+  // もしデータが空っぽだった場合の安全策
+  if (!projects || projects.length === 0) {
+    return <div className="text-white text-center py-20">Loading projects...</div>;
+  }
+
   return (
-    // ★ここを変更：relative z-10 を追加して、Heroより手前に表示させる
-    <div className="min-h-screen bg-black text-white py-20 px-4 relative z-10">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        {projects.map((project) => (
-          <Link href={`/work/${project.id}`} key={project.id}>
-            <motion.div
-              className="relative aspect-video cursor-pointer group"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.4 }}
-            >
+    <div className="py-20 px-4 md:px-20 max-w-[1600px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        {/* 受け取った projects を使ってループ表示 */}
+        {projects.map((project, index) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+            viewport={{ once: true }}
+            className="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-neutral-800"
+          >
+            <Link href={`/work/${project.id}`} className="block w-full h-full">
               {/* 画像 */}
-              <motion.div
-                layoutId={`image-${project.id}`}
-                className="relative w-full h-full overflow-hidden rounded-lg"
-              >
-                <Image
-                  src={project.src}
-                  alt={project.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </motion.div>
-
-              {/* テキスト情報 */}
-              <div className="mt-4">
-                <h3 className="text-2xl font-bold">{project.title}</h3>
-                <p className="text-gray-400">{project.category}</p>
+              <img
+                src={project.src}
+                alt={project.title}
+                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+              />
+              
+              {/* テキスト（マウスホバーで浮き出る演出） */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+                <h3 className="text-3xl font-bold text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  {project.title}
+                </h3>
+                <p className="text-gray-300 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                  {project.category}
+                </p>
               </div>
-            </motion.div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>
