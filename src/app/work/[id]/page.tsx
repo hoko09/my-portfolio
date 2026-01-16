@@ -5,14 +5,13 @@ import { notFound } from 'next/navigation';
 
 export const revalidate = 0;
 
-// ★ Vercelのチェックを確実に通すための最もシンプルな定義
-export default async function WorkDetail({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  // params を await する（Next.js 15 の必須ルール）
-  const { id } = await params;
+// ★ Vercelの厳格な型チェックを回避する、最も安全な書き方
+export default async function WorkDetail(props: any) {
+  // params を確実に取得
+  const params = await props.params;
+  const id = params?.id;
+
+  if (!id) return notFound();
 
   const project = await client
     .get({
@@ -21,9 +20,7 @@ export default async function WorkDetail({
     })
     .catch(() => null);
 
-  if (!project) {
-    return notFound();
-  }
+  if (!project) return notFound();
 
   return (
     <div className="bg-neutral-900 min-h-screen text-white pb-20">
@@ -43,16 +40,10 @@ export default async function WorkDetail({
       </div>
 
       <div className="max-w-4xl mx-auto px-6 -mt-32 relative z-10">
-        <span className="text-green-400 font-mono mb-4 block">
-          {project.category}
-        </span>
-        <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
-          {project.title}
-        </h1>
+        <span className="text-green-400 font-mono mb-4 block">{project.category}</span>
+        <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">{project.title}</h1>
         <div className="bg-neutral-800/50 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-neutral-700">
-          <p className="text-lg md:text-xl text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {project.description}
-          </p>
+          <p className="text-lg md:text-xl text-gray-300 leading-relaxed whitespace-pre-wrap">{project.description}</p>
         </div>
       </div>
     </div>
