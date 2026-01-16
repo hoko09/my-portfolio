@@ -5,17 +5,16 @@ import { notFound } from 'next/navigation';
 
 export const revalidate = 0;
 
-// ★ Vercelの厳格なルールに合わせて型の書き方を修正
-interface PageProps {
+// Next.js 15 の標準的な型定義
+type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
+};
 
-export default async function WorkDetail(props: PageProps) {
-  // params を await して ID を取り出す
-  const params = await props.params;
-  const id = params.id;
+export default async function WorkDetail({ params }: Props) {
+  // 1. params を await して id を取得（Next.js 15の必須ルール）
+  const { id } = await params;
 
+  // 2. MicroCMSからデータを取得
   const project = await client
     .get({
       endpoint: "projects",
@@ -36,11 +35,13 @@ export default async function WorkDetail(props: PageProps) {
       </div>
 
       <div className="w-full h-[60vh] relative">
-        <img
-          src={project.image?.url || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000"}
-          alt={project.title}
-          className="w-full h-full object-cover"
-        />
+        {project.image && (
+          <img
+            src={project.image.url}
+            alt={project.title}
+            className="w-full h-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 to-transparent" />
       </div>
 
